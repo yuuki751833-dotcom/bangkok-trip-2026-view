@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="color-scheme" content="light">
+  <title>バンコク旅行｜使える時間タイムライン</title>
+  <style>
+    :root {
+      --ink: #16221d;
+      --muted: #66736d;
+      --paper: #f6f4ed;
+      --card: #fffdf8;
+      --line: #dedbd0;
+      --green: #187a52;
+      --green-soft: #dff3e7;
+      --red: #b4473e;
+      --red-soft: #f7ded9;
+      --amber: #9a6720;
+      --amber-soft: #f7ead0;
+      --blue: #376986;
+      --blue-soft: #dfeef5;
+      --shadow: 0 18px 45px rgba(36, 43, 39, .08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(70, 145, 104, .12), transparent 34rem),
+        var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 72px; }
+    header { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end; margin-bottom: 30px; }
+    .eyebrow { margin: 0 0 8px; color: var(--green); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 4.25rem); line-height: 1.06; letter-spacing: -.055em; }
+    .lead { max-width: 690px; margin: 18px 0 0; color: var(--muted); font-size: clamp(.95rem, 1.8vw, 1.08rem); }
+    .trip-length { min-width: 170px; padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255, 253, 248, .72); text-align: right; }
+    .trip-length strong { display: block; font-size: 2rem; line-height: 1; }
+    .trip-length span { color: var(--muted); font-size: .82rem; }
+
+    .tabs { position: sticky; top: 10px; z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 0 0 28px; padding: 5px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 253, 248, .92); box-shadow: 0 8px 24px rgba(36, 43, 39, .09); backdrop-filter: blur(12px); }
+    .tab-button { appearance: none; border: 0; border-radius: 11px; padding: 11px 12px; color: var(--muted); background: transparent; font: inherit; font-size: .9rem; font-weight: 800; cursor: pointer; }
+    .tab-button:hover { color: var(--ink); background: #f1efe8; }
+    .tab-button[aria-selected="true"] { color: white; background: var(--green); }
+    .tab-panel[hidden] { display: none; }
+    .panel-heading { margin: 0 0 18px; }
+    .panel-heading h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -.035em; }
+    .panel-heading p { margin: 5px 0 0; color: var(--muted); font-size: .9rem; }
+
+    .budget-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .budget-card { min-height: 175px; padding: 21px 22px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); }
+    .budget-card h3 { margin: 0 0 6px; font-size: 1rem; }
+    .budget-card p { margin: 0; color: var(--muted); font-size: .82rem; }
+    .budget-value { display: block; margin: 22px 0 5px; font-size: 1.45rem; font-weight: 850; }
+    .budget-empty { color: var(--amber); }
+    .subtabs { display: flex; gap: 8px; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .subtab-button { appearance: none; padding: 8px 13px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: var(--card); font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; }
+    .subtab-button[aria-selected="true"] { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+    .budget-panel[hidden] { display: none; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
+    .budget-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: .84rem; }
+    .budget-table th, .budget-table td { padding: 13px 15px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    .budget-table th { color: var(--muted); background: #f0eee7; font-size: .74rem; letter-spacing: .03em; }
+    .budget-table tr:last-child td { border-bottom: 0; }
+    .budget-table td.amount { font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+    .budget-table td.pending { color: var(--amber); }
+    .budget-input, .budget-select { width: 100%; min-width: 120px; padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: white; font: inherit; }
+    .budget-input[type="number"] { min-width: 110px; text-align: right; }
+    .budget-input:focus, .budget-select:focus { outline: 2px solid rgba(24, 122, 82, .2); border-color: var(--green); }
+    .budget-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+    .budget-toolbar p { margin: 0; color: var(--muted); font-size: .78rem; }
+    .budget-action { appearance: none; padding: 9px 13px; border: 0; border-radius: 10px; color: white; background: var(--green); font: inherit; font-size: .8rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+    .delete-action { appearance: none; padding: 7px 9px; border: 1px solid #e2b8b2; border-radius: 8px; color: var(--red); background: var(--red-soft); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+    .person-picker { position: relative; min-width: 190px; }
+    .person-picker summary { padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; background: white; cursor: pointer; white-space: nowrap; }
+    .person-picker[open] summary { border-color: var(--green); }
+    .person-options { position: absolute; z-index: 30; width: 220px; max-height: 260px; overflow-y: auto; margin-top: 5px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .person-options label { display: flex; align-items: center; gap: 8px; padding: 5px 2px; cursor: pointer; }
+    .save-state { color: var(--green); font-size: .75rem; font-weight: 750; }
+    .target-list { display: flex; flex-wrap: wrap; gap: 6px; min-width: 160px; }
+    .target-chip { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: 0 0 32px; border: 2px solid transparent; border-radius: 50%; font-size: .68rem; font-weight: 900; line-height: 1; white-space: nowrap; }
+    .member-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0 0 15px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 253, 248, .7); }
+    .member-legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .74rem; font-weight: 700; }
+    button.member-legend-item { appearance: none; padding: 5px 8px; border: 2px solid transparent; border-radius: 12px; background: transparent; font: inherit; cursor: pointer; }
+    button.member-legend-item:hover { background: #f0eee7; }
+    button.member-legend-item[aria-pressed="true"] { color: var(--ink); border-color: var(--green); background: white; box-shadow: 0 4px 12px rgba(36, 43, 39, .08); }
+    .member-filter-all { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; color: white; background: var(--ink); font-size: .67rem; font-weight: 900; }
+    .status-chip { display: inline-block; padding: 3px 8px; border-radius: 99px; font-size: .7rem; font-weight: 800; white-space: nowrap; }
+    .status-chip.settled { color: var(--green); background: var(--green-soft); }
+    .status-chip.open { color: var(--red); background: var(--red-soft); }
+    .status-chip.considering { color: var(--amber); background: var(--amber-soft); }
+    .view-item-name { min-width: 210px; font-weight: 700; }
+    #toggle-budget-edit, #add-budget-item { display: none !important; }
+    .amount-link { appearance: none; padding: 4px 7px; border: 0; border-bottom: 1px solid currentColor; color: var(--green); background: transparent; font: inherit; font-weight: 850; cursor: pointer; white-space: nowrap; }
+    .amount-link:hover { color: var(--ink); }
+    .person-status { display: inline-block; padding: 2px 7px; border-radius: 99px; color: var(--green); background: var(--green-soft); font-size: .68rem; font-weight: 750; }
+    .person-status.pending { color: var(--amber); background: var(--amber-soft); }
+    .budget-help { margin: 13px 2px 0; color: var(--muted); font-size: .78rem; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 0 0 28px; padding: 0; list-style: none; color: var(--muted); font-size: .84rem; }
+    .legend li { display: flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .free-dot { background: var(--green); }
+    .flight-dot { background: var(--red); }
+    .transit-dot { background: var(--blue); }
+    .uncertain-dot { background: var(--amber); }
+
+    .routes { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 28px; }
+    .route-card { padding: 21px 22px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); }
+    .route-card h2 { margin: 0 0 5px; font-size: 1rem; }
+    .route-members { margin: 0 0 15px; color: var(--muted); font-size: .83rem; }
+    .route-path { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-size: .86rem; font-weight: 750; }
+    .route-stop { padding: 5px 9px; border-radius: 8px; background: #eeece4; }
+    .route-arrow { color: var(--muted); }
+    .route-note { margin: 13px 0 0; color: var(--muted); font-size: .78rem; }
+
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow: hidden;
+      margin-bottom: 30px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .overview-day { position: relative; min-height: 188px; padding: 22px; border-right: 1px solid var(--line); }
+    .overview-day:last-child { border-right: 0; }
+    .overview-date { margin-bottom: 22px; }
+    .overview-date b { display: block; font-size: 1.14rem; }
+    .overview-date span { color: var(--muted); font-size: .8rem; }
+    .overview-bar { height: 14px; display: flex; overflow: hidden; border-radius: 99px; background: #eceae2; }
+    .seg { height: 100%; }
+    .seg.free { background: var(--green); }
+    .seg.flight { background: var(--red); }
+    .seg.transit { background: var(--blue); }
+    .seg.uncertain { background: repeating-linear-gradient(135deg, var(--amber) 0 5px, #d9b26e 5px 10px); }
+    .overview-note { margin: 12px 0 0; font-size: .86rem; font-weight: 700; }
+
+    .days { display: grid; gap: 18px; }
+    .day-card { display: grid; grid-template-columns: 185px 1fr; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--card); }
+    .date-panel { padding: 25px; background: #eeece4; }
+    .date-panel .month { color: var(--muted); font-size: .76rem; font-weight: 800; letter-spacing: .12em; }
+    .date-panel .date { display: block; margin: 3px 0; font-size: 2.8rem; font-weight: 850; line-height: 1; letter-spacing: -.06em; }
+    .date-panel .day { color: var(--muted); font-size: .9rem; }
+    .date-panel .place { display: block; margin-top: 16px; font-size: .92rem; font-weight: 750; }
+
+    .schedule { padding: 23px 26px 25px; }
+    .event { display: grid; grid-template-columns: 62px 14px 1fr; gap: 12px; min-height: 64px; }
+    .time { padding-top: 2px; font-variant-numeric: tabular-nums; font-size: .88rem; font-weight: 800; }
+    .rail { position: relative; display: flex; justify-content: center; }
+    .rail::before { content: ""; position: absolute; top: 13px; bottom: -13px; width: 2px; background: var(--line); }
+    .event:last-child .rail::before { display: none; }
+    .node { position: relative; z-index: 1; width: 12px; height: 12px; margin-top: 5px; border-radius: 50%; border: 3px solid var(--card); box-shadow: 0 0 0 2px currentColor; background: currentColor; }
+    .event.flight .node { color: var(--red); }
+    .event.free .node { color: var(--green); }
+    .event.transit .node { color: var(--blue); }
+    .event.stay .node { color: var(--blue); }
+    .event.uncertain .node { color: var(--amber); }
+    .event h2 { margin: 0; font-size: 1rem; line-height: 1.35; }
+    .event p { margin: 5px 0 0; color: var(--muted); font-size: .84rem; }
+    .tag { display: inline-block; margin-left: 7px; padding: 2px 7px; border-radius: 99px; font-size: .67rem; vertical-align: 2px; }
+    .tag.free { color: var(--green); background: var(--green-soft); }
+    .tag.fixed { color: var(--red); background: var(--red-soft); }
+    .tag.estimate { color: var(--amber); background: var(--amber-soft); }
+    .tag.transit { color: var(--blue); background: var(--blue-soft); }
+
+    .callout { margin-top: 28px; padding: 22px 24px; border-left: 5px solid var(--amber); border-radius: 8px 18px 18px 8px; background: var(--amber-soft); }
+    .callout h2 { margin: 0 0 6px; font-size: 1rem; }
+    .callout p { margin: 0; color: #6f5125; font-size: .88rem; }
+    footer { margin-top: 22px; color: var(--muted); font-size: .76rem; text-align: right; }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 22px, 620px); padding: 32px 0 48px; }
+      header { grid-template-columns: 1fr; gap: 18px; }
+      .trip-length { width: 100%; text-align: left; }
+      .trip-length strong { display: inline; margin-right: 8px; }
+      .tabs { top: 6px; }
+      .budget-grid { grid-template-columns: 1fr; }
+      .routes { grid-template-columns: 1fr; }
+      .overview { grid-template-columns: 1fr 1fr; }
+      .overview-day { min-height: 150px; padding: 18px; border-bottom: 1px solid var(--line); }
+      .overview-day:nth-child(2) { border-right: 0; }
+      .overview-day:nth-child(3), .overview-day:nth-child(4) { border-bottom: 0; }
+      .day-card { grid-template-columns: 1fr; }
+      .date-panel { display: flex; align-items: baseline; gap: 9px; padding: 16px 20px; }
+      .date-panel .date { font-size: 2rem; }
+      .date-panel .place { margin: 0 0 0 auto; }
+      .schedule { padding: 20px 17px 20px 15px; }
+      .event { grid-template-columns: 52px 12px 1fr; gap: 9px; }
+    }
+
+    @media (max-width: 390px) {
+      .overview { grid-template-columns: 1fr; }
+      .overview-day { min-height: auto; border-right: 0; border-bottom: 1px solid var(--line) !important; }
+      .overview-day:last-child { border-bottom: 0 !important; }
+      .overview-date { margin-bottom: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <p class="eyebrow">Bangkok trip · 2026</p>
+        <h1>旅行中の<br>使える時間</h1>
+        <p class="lead">フライト時刻を軸に、タイで自由に使えそうな時間と、まだ確定できない移動時間を分けて整理しました。時刻はすべて現地時刻です。</p>
+      </div>
+      <div class="trip-length"><strong>3日＋α</strong><span>タイで活動できる目安</span></div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="旅行情報の分類">
+      <button class="tab-button" type="button" role="tab" id="button-cebu" aria-controls="tab-cebu" aria-selected="false" data-tab="cebu">セブ組</button>
+      <button class="tab-button" type="button" role="tab" id="button-common" aria-controls="tab-common" aria-selected="true" data-tab="common">共通</button>
+      <button class="tab-button" type="button" role="tab" id="button-budget" aria-controls="tab-budget" aria-selected="false" data-tab="budget">予算管理</button>
+    </nav>
+
+    <section class="tab-panel" id="tab-cebu" role="tabpanel" aria-labelledby="button-cebu" hidden>
+      <div class="panel-heading"><h2>セブ経由組</h2><p>松本・魚島・竹内（タイ）の個別日程</p></div>
+      <section class="routes" aria-label="セブ経由組のルート">
+        <article class="route-card">
+          <h2>東京 → セブ島 → バンコク <span class="tag fixed">3名</span></h2>
+          <p class="route-members">松本・魚島・竹内（タイ）</p>
+          <div class="route-path"><span class="route-stop">12/23 東京</span><span class="route-arrow">→</span><span class="route-stop">セブ島</span><span class="route-arrow">→</span><span class="route-stop">12/26 バンコク</span></div>
+          <p class="route-note">各便の時刻・航空券価格・セブ島での予定は、情報が決まり次第ここへ追加します。</p>
+        </article>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="tab-budget" role="tabpanel" aria-labelledby="button-budget" hidden>
+      <div class="panel-heading"><h2>予算管理</h2><p>項目を編集すると、個人別の負担額まで自動計算されます。</p></div>
+      <div class="budget-grid" style="margin-bottom:20px">
+        <article class="budget-card"><h3 id="budget-total-title">全項目の合計</h3><p id="budget-total-caption">入力済み金額の総額</p><strong class="budget-value" id="budget-total">—</strong><p>精算状況を問わない合計</p></article>
+        <article class="budget-card"><h3 id="budget-settled-title">精算済み</h3><p>支払い・精算が完了した金額</p><strong class="budget-value" id="budget-settled">—</strong><p id="budget-settled-count">—</p></article>
+        <article class="budget-card"><h3 id="budget-open-title">未精算・検討中</h3><p>今後確認または支払いが必要</p><strong class="budget-value budget-empty" id="budget-open">—</strong><p id="budget-open-count">—</p></article>
+      </div>
+      <nav class="subtabs" role="tablist" aria-label="予算の表示方法">
+        <button class="subtab-button" type="button" role="tab" id="budget-button-items" aria-controls="budget-items" aria-selected="true" data-budget-tab="items">項目別の全体金額</button>
+        <button class="subtab-button" type="button" role="tab" id="budget-button-people" aria-controls="budget-people" aria-selected="false" data-budget-tab="people">個人別予算</button>
+      </nav>
+
+      <section class="budget-panel" id="budget-items" role="tabpanel" aria-labelledby="budget-button-items">
+        <div class="member-legend" id="budget-member-legend" aria-label="対象者の色分け"></div>
+        <div class="budget-toolbar"><p><span class="save-state" id="budget-save-state">閲覧モード</span></p><div><button class="budget-action" type="button" id="add-budget-item" hidden>＋ 項目を追加</button> <button class="budget-action" type="button" id="toggle-budget-edit">✎ 編集</button></div></div>
+        <div class="table-wrap">
+          <table class="budget-table">
+            <thead><tr><th>No</th><th>行事・項目名</th><th>日付</th><th>全体金額</th><th>対象者</th><th>1人あたり</th><th>精算状況</th><th id="budget-action-head" hidden></th></tr></thead>
+            <tbody id="budget-items-body"></tbody>
+          </table>
+        </div>
+        <p class="budget-help">項目名・金額・対象者・精算状況は直接編集できます。変更はこのブラウザ内に保存されます。</p>
+      </section>
+
+      <section class="budget-panel" id="budget-people" role="tabpanel" aria-labelledby="budget-button-people" hidden>
+        <div class="table-wrap">
+          <table class="budget-table">
+            <thead><tr><th>メンバー</th><th>参加ルート</th><th>予算合計</th><th>精算済み</th><th>未精算・検討中</th><th>参加状況</th></tr></thead>
+            <tbody id="budget-people-body"></tbody>
+          </table>
+        </div>
+        <p class="budget-help">各項目の金額を選択した対象者数で均等割りし、個人別に自動集計しています。</p>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="tab-common" role="tabpanel" aria-labelledby="button-common">
+
+    <ul class="legend" aria-label="色分け">
+      <li><span class="dot free-dot"></span>自由時間候補</li>
+      <li><span class="dot flight-dot"></span>フライト</li>
+      <li><span class="dot transit-dot"></span>トランジット</li>
+      <li><span class="dot uncertain-dot"></span>未確定・移動見込み</li>
+    </ul>
+
+    <section class="routes" aria-label="参加メンバーの合流ルート">
+      <article class="route-card">
+        <h2>東京発組 <span class="tag estimate">3名＋1名未確定</span></h2>
+        <p class="route-members">井口・竹内（れい）・高橋・河村（未確定）</p>
+        <div class="route-path"><span class="route-stop">12/26 東京</span><span class="route-arrow">→</span><span class="route-stop">12/27 バンコク</span><span class="route-arrow">→</span><span class="route-stop">現地合流</span></div>
+        <p class="route-note">19:45成田発・翌01:10ドンムアン着のフライト情報はこちらの組として整理。</p>
+      </article>
+    </section>
+
+    <section class="overview" aria-label="タイ滞在中の概要">
+      <article class="overview-day">
+        <div class="overview-date"><b>12/27（日）</b><span>バンコク到着日</span></div>
+        <div class="overview-bar" aria-label="到着後の手続きは未確定、その後は自由時間候補"><span class="seg uncertain" style="width:33%"></span><span class="seg free" style="width:67%"></span></div>
+        <p class="overview-note">睡眠後から活動できる可能性</p>
+      </article>
+      <article class="overview-day">
+        <div class="overview-date"><b>12/28（月）</b><span>アユタヤ日帰り</span></div>
+        <div class="overview-bar"><span class="seg uncertain" style="width:14%"></span><span class="seg free" style="width:72%"></span><span class="seg uncertain" style="width:14%"></span></div>
+        <p class="overview-note">遺跡観光に1日</p>
+      </article>
+      <article class="overview-day">
+        <div class="overview-date"><b>12/29（火）</b><span>バンコク → パタヤ</span></div>
+        <div class="overview-bar"><span class="seg free" style="width:50%"></span><span class="seg uncertain" style="width:8%"></span><span class="seg free" style="width:42%"></span></div>
+        <p class="overview-note">12:00出発・13:30到着</p>
+      </article>
+      <article class="overview-day">
+        <div class="overview-date"><b>12/30（水）</b><span>パタヤ → 空港 → 出国</span></div>
+        <div class="overview-bar"><span class="seg free" style="width:56%"></span><span class="seg uncertain" style="width:18%"></span><span class="seg flight" style="width:26%"></span></div>
+        <p class="overview-note">13:30までパタヤ</p>
+      </article>
+    </section>
+
+    <section class="days" aria-label="日付ごとのタイムライン">
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">26</strong><span class="day">土曜日</span><span class="place">🇯🇵 東京</span></div>
+        <div class="schedule">
+          <div class="event stay"><div class="time">14:00〜</div><div class="rail"><span class="node"></span></div><div><h2>バンコクのAirbnbにチェックイン可能 <span class="tag fixed">予約済み</span></h2><p>「Spacious | 50m to Sky train | Chatuchak」。実際の入室は27日深夜の到着後。</p></div></div>
+          <div class="event uncertain"><div class="time">〜16:45</div><div class="rail"><span class="node"></span></div><div><h2>成田空港へ・出発準備 <span class="tag estimate">目安</span></h2><p>国際線のため、空港到着時刻は余裕を持って設定してください。</p></div></div>
+          <div class="event flight"><div class="time">19:45</div><div class="rail"><span class="node"></span></div><div><h2>東京発組：成田空港 T2 出発 <span class="tag fixed">確定</span></h2><p>井口・竹内（れい）・高橋・河村（未確定）がバンコク・ドンムアン空港へ。</p></div></div>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">27</strong><span class="day">日曜日</span><span class="place">🇹🇭 バンコク</span></div>
+        <div class="schedule">
+          <div class="event flight"><div class="time">01:10</div><div class="rail"><span class="node"></span></div><div><h2>東京発組：ドンムアン空港 T1 到着 <span class="tag fixed">確定</span></h2><p>深夜到着。セブ経由組との合流時刻は今後調整。</p></div></div>
+          <div class="event uncertain"><div class="time">到着後</div><div class="rail"><span class="node"></span></div><div><h2>入国審査・荷物受取・市内移動 <span class="tag estimate">未確定</span></h2><p>所要時間は混雑、手荷物、宿泊先の場所で変わります。</p></div></div>
+          <div class="event stay"><div class="time">深夜</div><div class="rail"><span class="node"></span></div><div><h2>Airbnbへレイトチェックイン <span class="tag fixed">宿泊先確定</span></h2><p>「Spacious | 50m to Sky train | Chatuchak」。12月26日14:00から予約済みのため、到着後にそのまま入室します。</p></div></div>
+          <div class="event free"><div class="time">起床後</div><div class="rail"><span class="node"></span></div><div><h2>自由時間の候補 <span class="tag free">使えそう</span></h2><p>到着後に睡眠を取るため、実際の開始時刻は宿泊先と起床時間が決まり次第調整します。</p></div></div>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">28</strong><span class="day">月曜日</span><span class="place">🇹🇭 アユタヤ</span></div>
+        <div class="schedule">
+          <div class="event uncertain"><div class="time">朝</div><div class="rail"><span class="node"></span></div><div><h2>バンコクからアユタヤへ <span class="tag estimate">時刻未定</span></h2><p>交通手段と出発時刻は今後決定。</p></div></div>
+          <div class="event free"><div class="time">日中</div><div class="rail"><span class="node"></span></div><div><h2>アユタヤ遺跡観光 <span class="tag free">1日プラン</span></h2><p>この日はアユタヤ観光を中心に使う予定です。</p></div></div>
+          <div class="event uncertain"><div class="time">夕方〜夜</div><div class="rail"><span class="node"></span></div><div><h2>バンコクへ戻る <span class="tag estimate">時刻未定</span></h2><p>観光後にAirbnbへ戻り、バンコクで宿泊。</p></div></div>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">29</strong><span class="day">火曜日</span><span class="place">🇹🇭 パタヤ</span></div>
+        <div class="schedule">
+          <div class="event stay"><div class="time">12:00</div><div class="rail"><span class="node"></span></div><div><h2>バンコクのAirbnbをチェックアウト <span class="tag fixed">確定</span></h2><p>「Spacious | 50m to Sky train | Chatuchak」を退出し、予約したタクシーに乗車します。</p></div></div>
+          <div class="event uncertain"><div class="time">12:00</div><div class="rail"><span class="node"></span></div><div><h2>タクシーでパタヤへ出発 <span class="tag fixed">確定</span></h2><p>Airbnbまで迎えに来る予定です。</p></div></div>
+          <div class="event uncertain"><div class="time">13:30</div><div class="rail"><span class="node"></span></div><div><h2>Nonze Hostelに到着 <span class="tag fixed">確定</span></h2><p>予定所要時間は1時間30分。チェックイン開始まで30分あります。</p></div></div>
+          <div class="event stay"><div class="time">14:00〜</div><div class="rail"><span class="node"></span></div><div><h2>ノンゼホステルにチェックイン可能 <span class="tag fixed">確定</span></h2><p>14:00以降にチェックインし、パタヤで宿泊します。</p></div></div>
+          <div class="event free"><div class="time">その後</div><div class="rail"><span class="node"></span></div><div><h2>パタヤで過ごす <span class="tag free">自由時間</span></h2><p>観光内容は今後追加。</p></div></div>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">30</strong><span class="day">水曜日</span><span class="place">🇹🇭 → 🇻🇳</span></div>
+        <div class="schedule">
+          <div class="event free"><div class="time">午前</div><div class="rail"><span class="node"></span></div><div><h2>パタヤで自由時間 <span class="tag free">〜12:00</span></h2><p>チェックアウト準備を含め、正午までホステルを利用できます。</p></div></div>
+          <div class="event stay"><div class="time">12:00</div><div class="rail"><span class="node"></span></div><div><h2>ノンゼホステルをチェックアウト <span class="tag fixed">期限</span></h2><p>13:30のタクシー出発まで1時間30分。荷物預かりが可能かホステルへ確認。</p></div></div>
+          <div class="event uncertain"><div class="time">13:30</div><div class="rail"><span class="node"></span></div><div><h2>ノンゼホステルからタクシーで出発 <span class="tag fixed">確定</span></h2><p>バンコク市内には戻らず、スワンナプーム国際空港へ直行します。</p></div></div>
+          <div class="event uncertain"><div class="time">14:45</div><div class="rail"><span class="node"></span></div><div><h2>スワンナプーム国際空港に到着 <span class="tag fixed">確定</span></h2><p>予定所要時間は1時間15分。18:35の出発まで3時間50分あります。</p></div></div>
+          <div class="event flight"><div class="time">18:35</div><div class="rail"><span class="node"></span></div><div><h2>スワンナプーム空港 出発 <span class="tag fixed">確定</span></h2><p>ハノイへ。</p></div></div>
+          <div class="event transit"><div class="time">20:25</div><div class="rail"><span class="node"></span></div><div><h2>ノイバイ国際空港 到着 <span class="tag transit">乗継 11時間55分</span></h2><p>翌朝の出発までトランジット。入国可否や荷物の扱いは予約条件の確認が必要です。</p></div></div>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="date-panel"><span class="month">DECEMBER</span><strong class="date">31</strong><span class="day">木曜日</span><span class="place">🇻🇳 → 🇯🇵</span></div>
+        <div class="schedule">
+          <div class="event transit"><div class="time">〜08:20</div><div class="rail"><span class="node"></span></div><div><h2>ノイバイ空港でトランジット <span class="tag transit">乗継</span></h2><p>深夜〜早朝。空港外へ出る計画は、ビザ・再入場・乗継条件を確認してから。</p></div></div>
+          <div class="event flight"><div class="time">08:20</div><div class="rail"><span class="node"></span></div><div><h2>ノイバイ国際空港 T2 出発 <span class="tag fixed">確定</span></h2><p>成田へ。</p></div></div>
+          <div class="event flight"><div class="time">15:30</div><div class="rail"><span class="node"></span></div><div><h2>成田国際空港 T2 到着 <span class="tag fixed">確定</span></h2><p>帰国。</p></div></div>
+        </div>
+      </article>
+    </section>
+
+    <aside class="callout">
+      <h2>宿泊予定</h2>
+      <p>バンコクではAirbnb「Spacious | 50m to Sky train | Chatuchak」に12月26日14:00から29日12:00まで滞在します。所在地はバンコク・Bang Phlat地区、MRT Bang Phlat駅付近（座標：13°47'19.6&quot;N 100°30'14.2&quot;E／Soi Charan Sanit Wong 74/1周辺）です。29日12:00にタクシーで出発し、13:30にパタヤのNonze Hostelへ到着。14:00以降にチェックインし、30日12:00まで滞在します。</p>
+    </aside>
+    </section>
+    <footer>作成基準：提供された予約・移動情報／2026年12月</footer>
+  </main>
+  <script>
+    (() => {
+      const buttons = [...document.querySelectorAll('.tab-button')];
+      const panels = [...document.querySelectorAll('.tab-panel')];
+      function showTab(name, updateHash = true) {
+        const valid = buttons.some(button => button.dataset.tab === name) ? name : 'common';
+        buttons.forEach(button => {
+          const active = button.dataset.tab === valid;
+          button.setAttribute('aria-selected', String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+        panels.forEach(panel => { panel.hidden = panel.id !== `tab-${valid}`; });
+        if (updateHash) history.replaceState(null, '', `#${valid}`);
+      }
+      buttons.forEach((button, index) => {
+        button.addEventListener('click', () => showTab(button.dataset.tab));
+        button.addEventListener('keydown', event => {
+          if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+          event.preventDefault();
+          const offset = event.key === 'ArrowRight' ? 1 : -1;
+          const next = buttons[(index + offset + buttons.length) % buttons.length];
+          showTab(next.dataset.tab);
+          next.focus();
+        });
+      });
+      showTab(location.hash.slice(1) || 'common', false);
+
+      const budgetButtons = [...document.querySelectorAll('.subtab-button')];
+      const budgetPanels = [...document.querySelectorAll('.budget-panel')];
+      function showBudgetTab(name) {
+        budgetButtons.forEach(button => {
+          const active = button.dataset.budgetTab === name;
+          button.setAttribute('aria-selected', String(active));
+        });
+        budgetPanels.forEach(panel => { panel.hidden = panel.id !== `budget-${name}`; });
+      }
+      budgetButtons.forEach(button => button.addEventListener('click', () => showBudgetTab(button.dataset.budgetTab)));
+
+      const budgetStorageKey = 'bangkok-trip-budget-v1';
+      const members = [
+        { name: '松本', route: 'セブ経由組', participation: '参加' },
+        { name: '魚島', route: 'セブ経由組', participation: '参加' },
+        { name: '竹内（タイ）', route: 'セブ経由組', participation: '参加' },
+        { name: '井口', route: '東京発組', participation: '参加' },
+        { name: '竹内（れい）', route: '東京発組', participation: '参加' },
+        { name: '高橋', route: '東京発組', participation: '参加' },
+        { name: '河村', route: '東京発組', participation: '未確定' }
+      ];
+      const allNames = members.map(member => member.name);
+      const cebuNames = ['松本', '魚島', '竹内（タイ）'];
+      const tokyoNames = ['井口', '竹内（れい）', '高橋'];
+      const returnNames = ['松本', '井口', '竹内（れい）', '高橋', '魚島'];
+      const defaultBudgetItems = [
+        { id: 'tokyo-cebu', date: '12/23–24', name: '東京 → セブ島 航空券', amount: 88380, targets: cebuNames, status: '精算済み' },
+        { id: 'cebu-hotel', date: '12/24', name: 'セブ1日目ホテル', amount: 7229, targets: cebuNames, status: '精算済み' },
+        { id: 'cebu-bangkok', date: '12/26', name: 'セブ島 → バンコク 航空券', amount: 62790, targets: cebuNames, status: '精算済み' },
+        { id: 'tokyo-bangkok', date: '12/26', name: '東京 → バンコク 航空券', amount: 212550, targets: tokyoNames, status: '精算済み' },
+        { id: 'return-flight', date: '12/30', name: 'バンコク → 東京 航空券', amount: 245100, targets: returnNames, status: '精算済み' },
+        { id: 'bangkok-airbnb', date: '12/26–29', name: 'バンコク Airbnb', amount: 50400, targets: allNames, status: '精算済み' },
+        { id: 'ayutthaya-van', date: '12/28', name: 'アユタヤ貸切バン', amount: 0, targets: allNames, status: '検討中' },
+        { id: 'bangkok-pattaya-taxi', date: '12/29', name: 'バンコク → パタヤ タクシー', amount: 12099, targets: allNames, status: '精算済み' },
+        { id: 'nonze-hostel', date: '12/29', name: 'Nonze Hostel', amount: 27876, targets: allNames, status: '精算済み' },
+        { id: 'pattaya-airport-taxi', date: '12/30', name: 'パタヤ → スワンナプーム空港 タクシー', amount: 10918, targets: allNames, status: '精算済み' }
+      ];
+
+      function loadBudgetItems() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(budgetStorageKey));
+          if (Array.isArray(saved)) return saved.map(item => {
+            const defaultItem = defaultBudgetItems.find(candidate => candidate.id === item.id);
+            const dateMatch = String(item.name || '').match(/^(12\/\d{1,2}(?:[–-]\d{1,2})?)\s+(.+)$/);
+            return {
+              ...item,
+              date: item.date || defaultItem?.date || dateMatch?.[1] || '',
+              name: dateMatch?.[2] || item.name || defaultItem?.name || ''
+            };
+          });
+        } catch (_) {}
+        return defaultBudgetItems.map(item => ({ ...item, targets: [...item.targets] }));
+      }
+
+      let budgetItems = loadBudgetItems();
+      const yen = value => `${Math.round(Number(value) || 0).toLocaleString('ja-JP')}円`;
+      const saveState = document.getElementById('budget-save-state');
+      const editButton = document.getElementById('toggle-budget-edit');
+      const addButton = document.getElementById('add-budget-item');
+      const actionHead = document.getElementById('budget-action-head');
+      const memberMarks = { '松本': '松', '魚島': '魚', '竹内（タイ）': 'タイ', '井口': '井', '竹内（れい）': 'れい', '高橋': '高', '河村': '河' };
+      const memberColors = {
+        '松本': ['#dff3e7', '#12633f', '#85c6a1'],
+        '魚島': ['#dfeef8', '#225f82', '#8bc1dc'],
+        '竹内（タイ）': ['#fff0d2', '#8a5b13', '#e5ba67'],
+        '井口': ['#ece4f8', '#63448d', '#b7a0d7'],
+        '竹内（れい）': ['#f9e1ec', '#924666', '#dda2ba'],
+        '高橋': ['#dcf3f0', '#176a62', '#7cc4bc'],
+        '河村': ['#eceae5', '#5e5a51', '#bdb8ac']
+      };
+      let budgetEditMode = false;
+      let selectedBudgetMember = null;
+
+      function modeLabel() { return budgetEditMode ? '編集中・この端末に自動保存' : '閲覧モード'; }
+
+      function saveBudgetItems() {
+        localStorage.setItem(budgetStorageKey, JSON.stringify(budgetItems));
+        saveState.textContent = '保存しました';
+        clearTimeout(saveBudgetItems.timer);
+        saveBudgetItems.timer = setTimeout(() => { saveState.textContent = modeLabel(); }, 1200);
+      }
+
+      function makeCell() { return document.createElement('td'); }
+
+      function styleMemberChip(chip, name) {
+        const [background, color, border] = memberColors[name] || ['#eceae5', '#5e5a51', '#bdb8ac'];
+        chip.style.background = background;
+        chip.style.color = color;
+        chip.style.borderColor = border;
+      }
+
+      function renderMemberLegend() {
+        const legend = document.getElementById('budget-member-legend');
+        legend.replaceChildren();
+        const allButton = document.createElement('button');
+        allButton.type = 'button';
+        allButton.className = 'member-legend-item';
+        allButton.setAttribute('aria-pressed', String(selectedBudgetMember === null));
+        const allChip = document.createElement('span');
+        allChip.className = 'member-filter-all';
+        allChip.textContent = '全';
+        allButton.append(allChip, document.createTextNode('全員'));
+        allButton.addEventListener('click', () => {
+          selectedBudgetMember = null;
+          renderMemberLegend();
+          renderBudgetItems();
+          recalculateBudget();
+        });
+        legend.appendChild(allButton);
+        members.forEach(member => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'member-legend-item';
+          item.setAttribute('aria-pressed', String(selectedBudgetMember === member.name));
+          const chip = document.createElement('span');
+          chip.className = 'target-chip';
+          chip.textContent = memberMarks[member.name];
+          styleMemberChip(chip, member.name);
+          item.append(chip, document.createTextNode(member.name));
+          item.addEventListener('click', () => {
+            selectedBudgetMember = selectedBudgetMember === member.name ? null : member.name;
+            renderMemberLegend();
+            renderBudgetItems();
+            recalculateBudget();
+          });
+          legend.appendChild(item);
+        });
+      }
+
+      function updateBudgetSummaries() {
+        const relevantItems = selectedBudgetMember ? budgetItems.filter(item => item.targets.includes(selectedBudgetMember)) : budgetItems;
+        const valueFor = item => {
+          const amount = Number(item.amount) || 0;
+          return selectedBudgetMember && item.targets.length ? amount / item.targets.length : amount;
+        };
+        const total = relevantItems.reduce((sum, item) => sum + valueFor(item), 0);
+        const settledItems = relevantItems.filter(item => item.status === '精算済み');
+        const settled = settledItems.reduce((sum, item) => sum + valueFor(item), 0);
+        const openItems = relevantItems.filter(item => item.status !== '精算済み');
+        const open = openItems.reduce((sum, item) => sum + valueFor(item), 0);
+        const prefix = selectedBudgetMember ? `${selectedBudgetMember}：` : '';
+        document.getElementById('budget-total-title').textContent = `${prefix}${selectedBudgetMember ? '個人合計' : '全項目の合計'}`;
+        document.getElementById('budget-total-caption').textContent = selectedBudgetMember ? '対象項目の1人分' : '入力済み金額の総額';
+        document.getElementById('budget-settled-title').textContent = `${prefix}精算済み`;
+        document.getElementById('budget-open-title').textContent = `${prefix}未精算・検討中`;
+        document.getElementById('budget-total').textContent = yen(total);
+        document.getElementById('budget-settled').textContent = yen(settled);
+        document.getElementById('budget-open').textContent = yen(open);
+        document.getElementById('budget-settled-count').textContent = `${settledItems.length}項目が完了`;
+        document.getElementById('budget-open-count').textContent = `${openItems.length}項目を確認中`;
+      }
+
+      function renderPeopleBudget() {
+        const body = document.getElementById('budget-people-body');
+        body.replaceChildren();
+        members.forEach(member => {
+          let total = 0;
+          let settled = 0;
+          budgetItems.forEach(item => {
+            if (!item.targets.includes(member.name) || item.targets.length === 0) return;
+            const share = (Number(item.amount) || 0) / item.targets.length;
+            total += share;
+            if (item.status === '精算済み') settled += share;
+          });
+          const row = document.createElement('tr');
+          [member.name, member.route, yen(total), yen(settled), yen(total - settled)].forEach((value, index) => {
+            const cell = makeCell();
+            if (index === 2) {
+              const link = document.createElement('button');
+              link.type = 'button';
+              link.className = 'amount-link';
+              link.textContent = value;
+              link.title = `${member.name}の対象項目を表示`;
+              link.addEventListener('click', () => {
+                selectedBudgetMember = member.name;
+                showBudgetTab('items');
+                renderMemberLegend();
+                renderBudgetItems();
+                recalculateBudget();
+                document.getElementById('budget-items').scrollIntoView({ behavior: 'smooth', block: 'start' });
+              });
+              cell.appendChild(link);
+            } else {
+              cell.textContent = value;
+            }
+            if (index >= 2) cell.classList.add('amount');
+            row.appendChild(cell);
+          });
+          const statusCell = makeCell();
+          const status = document.createElement('span');
+          status.className = `person-status${member.participation === '未確定' ? ' pending' : ''}`;
+          status.textContent = member.participation;
+          statusCell.appendChild(status);
+          row.appendChild(statusCell);
+          body.appendChild(row);
+        });
+      }
+
+      function recalculateBudget() {
+        updateBudgetSummaries();
+        renderPeopleBudget();
+      }
+
+      function renderBudgetItems() {
+        const body = document.getElementById('budget-items-body');
+        body.replaceChildren();
+        actionHead.hidden = !budgetEditMode;
+        addButton.hidden = !budgetEditMode;
+        editButton.textContent = budgetEditMode ? '✓ 編集を完了' : '✎ 編集';
+        saveState.textContent = modeLabel();
+        const visibleItems = selectedBudgetMember ? budgetItems.filter(item => item.targets.includes(selectedBudgetMember)) : budgetItems;
+        visibleItems.forEach(item => {
+          const row = document.createElement('tr');
+
+          const numberCell = makeCell();
+          numberCell.className = 'amount';
+          numberCell.textContent = String(budgetItems.indexOf(item) + 1);
+          row.appendChild(numberCell);
+
+          const nameCell = makeCell();
+          if (budgetEditMode) {
+            const nameInput = document.createElement('input');
+            nameInput.className = 'budget-input';
+            nameInput.value = item.name;
+            nameInput.setAttribute('aria-label', '項目名');
+            nameInput.addEventListener('input', () => { item.name = nameInput.value; saveBudgetItems(); });
+            nameCell.appendChild(nameInput);
+          } else {
+            nameCell.className = 'view-item-name';
+            nameCell.textContent = item.name || '名称未入力';
+          }
+          row.appendChild(nameCell);
+
+          const dateCell = makeCell();
+          if (budgetEditMode) {
+            const dateInput = document.createElement('input');
+            dateInput.className = 'budget-input';
+            dateInput.value = item.date || '';
+            dateInput.placeholder = '12/29';
+            dateInput.setAttribute('aria-label', `${item.name}の日付`);
+            dateInput.addEventListener('input', () => { item.date = dateInput.value; saveBudgetItems(); });
+            dateCell.appendChild(dateInput);
+          } else {
+            dateCell.className = 'amount';
+            dateCell.textContent = item.date || '—';
+          }
+          row.appendChild(dateCell);
+
+          const amountCell = makeCell();
+          if (budgetEditMode) {
+            const amountInput = document.createElement('input');
+            amountInput.className = 'budget-input';
+            amountInput.type = 'number';
+            amountInput.min = '0';
+            amountInput.step = '1';
+            amountInput.value = String(item.amount || 0);
+            amountInput.setAttribute('aria-label', `${item.name}の全体金額`);
+            amountInput.addEventListener('input', () => {
+              item.amount = Math.max(0, Number(amountInput.value) || 0);
+              shareCell.textContent = item.targets.length ? yen(item.amount / item.targets.length) : '対象者なし';
+              saveBudgetItems();
+              recalculateBudget();
+            });
+            amountCell.appendChild(amountInput);
+          } else {
+            amountCell.className = 'amount';
+            amountCell.textContent = yen(item.amount);
+          }
+          row.appendChild(amountCell);
+
+          const targetsCell = makeCell();
+          if (budgetEditMode) {
+            const details = document.createElement('details');
+            details.className = 'person-picker';
+            const summary = document.createElement('summary');
+            summary.textContent = item.targets.length ? `${item.targets.length}名を選択` : '対象者を選択';
+            const options = document.createElement('div');
+            options.className = 'person-options';
+            members.forEach(member => {
+              const label = document.createElement('label');
+              const checkbox = document.createElement('input');
+              checkbox.type = 'checkbox';
+              checkbox.checked = item.targets.includes(member.name);
+              checkbox.addEventListener('change', () => {
+                item.targets = members.filter(person => options.querySelector(`input[data-name="${CSS.escape(person.name)}"]`)?.checked).map(person => person.name);
+                saveBudgetItems();
+                renderBudgetItems();
+                recalculateBudget();
+              });
+              checkbox.dataset.name = member.name;
+              label.append(checkbox, document.createTextNode(member.name));
+              options.appendChild(label);
+            });
+            details.append(summary, options);
+            targetsCell.appendChild(details);
+          } else {
+            const list = document.createElement('div');
+            list.className = 'target-list';
+            item.targets.forEach(name => {
+              const chip = document.createElement('span');
+              chip.className = 'target-chip';
+              chip.textContent = memberMarks[name] || name.slice(0, 1);
+              styleMemberChip(chip, name);
+              chip.title = name;
+              chip.setAttribute('aria-label', name);
+              list.appendChild(chip);
+            });
+            if (!item.targets.length) list.textContent = '対象者なし';
+            targetsCell.appendChild(list);
+          }
+          row.appendChild(targetsCell);
+
+          const shareCell = makeCell();
+          shareCell.className = 'amount';
+          shareCell.textContent = item.targets.length ? yen(item.amount / item.targets.length) : '対象者なし';
+          row.appendChild(shareCell);
+
+          const statusCell = makeCell();
+          if (budgetEditMode) {
+            const select = document.createElement('select');
+            select.className = 'budget-select';
+            ['精算済み', '未精算', '検討中'].forEach(value => {
+              const option = document.createElement('option');
+              option.value = value;
+              option.textContent = value;
+              option.selected = item.status === value;
+              select.appendChild(option);
+            });
+            select.addEventListener('change', () => { item.status = select.value; saveBudgetItems(); recalculateBudget(); });
+            statusCell.appendChild(select);
+          } else {
+            const status = document.createElement('span');
+            status.className = `status-chip ${item.status === '精算済み' ? 'settled' : item.status === '未精算' ? 'open' : 'considering'}`;
+            status.textContent = item.status;
+            statusCell.appendChild(status);
+          }
+          row.appendChild(statusCell);
+
+          if (budgetEditMode) {
+            const deleteCell = makeCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'delete-action';
+            deleteButton.textContent = '削除';
+            deleteButton.addEventListener('click', () => {
+              if (!confirm(`「${item.name || '名称未入力'}」を削除しますか？`)) return;
+              budgetItems = budgetItems.filter(current => current.id !== item.id);
+              saveBudgetItems();
+              renderBudgetItems();
+              recalculateBudget();
+            });
+            deleteCell.appendChild(deleteButton);
+            row.appendChild(deleteCell);
+          }
+          body.appendChild(row);
+        });
+      }
+
+      editButton.addEventListener('click', () => {
+        budgetEditMode = !budgetEditMode;
+        renderBudgetItems();
+      });
+
+      addButton.addEventListener('click', () => {
+        const id = `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        budgetItems.push({ id, date: '', name: '新しい項目', amount: 0, targets: selectedBudgetMember ? [selectedBudgetMember] : [], status: '未精算' });
+        saveBudgetItems();
+        renderBudgetItems();
+        recalculateBudget();
+        document.querySelector('#budget-items-body tr:last-child input')?.focus();
+      });
+
+      renderMemberLegend();
+      renderBudgetItems();
+      recalculateBudget();
+    })();
+  </script>
+</body>
+</html>
