@@ -743,8 +743,9 @@
               checkbox.checked = item.targets.includes(member.name);
               checkbox.addEventListener('change', () => {
                 item.targets = members.filter(person => options.querySelector(`input[data-name="${CSS.escape(person.name)}"]`)?.checked).map(person => person.name);
+                summary.textContent = item.targets.length ? `${item.targets.length}名を選択` : '対象者を選択';
+                shareCell.textContent = item.targets.length ? yen(item.amount / item.targets.length) : '対象者なし';
                 saveBudgetItems();
-                renderBudgetItems();
                 recalculateBudget();
               });
               checkbox.dataset.name = member.name;
